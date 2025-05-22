@@ -1,0 +1,22 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pth
+.env
+*.sqlite3
+*.db
+*.log
+instance/
+*.h5
+*.pt
+*.pth
+.DS_Store
+venv/
+.env/
+.idea/
+*.egg-info/
+*.bak
+*.tmp
+# Model files
+models/*.pth

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Image Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>AI Image Generator</h1>
+        <p>Click a button to generate an image from a model:</p>
+
+        <div class="card-grid">
+            <div class="card">
+                <h2>VAE</h2>
+                <button onclick="generateImage('vae', 'vae-output', 'vae-status')">Generate</button>
+                <p id="vae-status" class="status"></p>
+                <img id="vae-output" class="output-image" src="" alt="VAE Output" />
+            </div>
+
+            <div class="card">
+                <h2>DCGAN</h2>
+                <button onclick="generateImage('dcgan', 'dcgan-output', 'dcgan-status')">Generate</button>
+                <p id="dcgan-status" class="status"></p>
+                <img id="dcgan-output" class="output-image" src="" alt="DCGAN Output" />
+            </div>
+
+            <div class="card">
+                <h2>WGAN</h2>
+                <button onclick="generateImage('wgan', 'wgan-output', 'wgan-status')">Generate</button>
+                <p id="wgan-status" class="status"></p>
+                <img id="wgan-output" class="output-image" src="" alt="WGAN Output" />
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function generateImage(model, imgId, statusId) {
+            document.getElementById(statusId).textContent = 'Generating...';
+            document.getElementById(imgId).src = '';
+
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model: model })
+                });
+
+                const data = await response.json();
+                if (data.status === 'success') {
+                    document.getElementById(imgId).src = 'data:image/png;base64,' + data.image;
+                    document.getElementById(statusId).textContent = '';
+                } else {
+                    document.getElementById(statusId).textContent = 'Error: ' + data.message;
+                }
+            } catch (err) {
+                document.getElementById(statusId).textContent = 'Server error';
+            }
+        }
+    </script>
+</body>
+</html>
