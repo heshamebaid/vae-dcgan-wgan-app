@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Synthetic Hand-Sketched Image Generation - CSE 429</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #3b82f6;  /* Cool Blue */
+      --secondary-color: #0e7490;  /* Deep Teal */
+      --background: #f0f4f8;  /* Light Blue Gray */
+      --text-color: #1e293b;  /* Slate */
+      --card-bg: #ffffff;
+      --border-radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--background);
+      color: var(--text-color);
+      padding: 20px;
+      max-width: 1000px;
+      margin: auto;
+      line-height: 1.6;
+    }
+
+    h1, h2, h3 {
+      color: var(--primary-color);
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: 2.4em;
+    }
+
+    h2 {
+      margin-top: 30px;
+      font-size: 1.8em;
+    }
+
+    h3 {
+      margin-top: 20px;
+      font-size: 1.3em;
+    }
+
+    p, ul, ol {
+      margin: 10px 0 20px;
+    }
+
+    ul, ol {
+      padding-left: 20px;
+    }
+
+    section {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+      padding: 25px;
+      margin-bottom: 30px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    header p {
+      font-size: 1em;
+      color: #475569;
+    }
+
+    .image-row {
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .image-col {
+      flex: 1 1 30%;
+      text-align: center;
+    }
+
+    .image-col img {
+      width: 100%;
+      max-width: 300px;
+      border-radius: var(--border-radius);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .image-col figcaption {
+      font-size: 0.95em;
+      color: #64748b;
+      margin-top: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 12px;
+      text-align: center;
+    }
+
+    th {
+      background-color: var(--secondary-color);
+      color: white;
+    }
+
+    tr:hover {
+      background-color: #e0f2fe;
+    }
+
+    pre {
+      background-color: #e2e8f0;
+      padding: 15px;
+      overflow-x: auto;
+      border-radius: var(--border-radius);
+      color: #1e293b;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Generating Synthetic Hand-Sketched Facial Images</h1>
+    <p><strong>Course:</strong> CSE 429 | <strong>Department:</strong> Computer Science & Engineering | <strong>Date:</strong> May 20, 2025</p>
+    <p><strong>Group Members:</strong></p>
+    <ul>
+      <li>Hesham Ahmed Ebaid - 120210064</li>
+      <li>Ahmed Medhat Loutfy - 120210063</li>
+      <li>Yehia Ali Othman - 120210302</li>
+    </ul>
+  </header>
+
+  <section>
+    <h2>Abstract</h2>
+    <p>
+      We present a comprehensive analysis and implementation of three generative models—Variational Autoencoder (VAE), Deep Convolutional GAN (DCGAN), and Wasserstein GAN (WGAN)—to generate hand-sketched facial images from the CUHK Face Sketch dataset. The objective is to synthesize realistic and coherent sketches from training data and provide a comparative study of each model’s performance using quantitative and qualitative metrics. The final application allows users to generate images through a user-friendly web interface.
+    </p>
+  </section>
+
+  <section>
+    <h2>Teaser Comparison</h2>
+    <div class="image-row">
+      <div class="image-col">
+        <img src="VAE.png" alt="VAE Architecture" />
+        <figcaption>VAE Architecture</figcaption>
+      </div>
+      <div class="image-col">
+        <img src="DCGAN.png" alt="DCGAN Architecture" />
+        <figcaption>DCGAN Architecture</figcaption>
+      </div>
+      <div class="image-col">
+        <img src="WGAN.jpg" alt="WGAN Architecture" />
+        <figcaption>WGAN Architecture</figcaption>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>1. Introduction</h2>
+    <p>
+      Generating sketches from real images is an important task with applications in digital art, forensics, and human-computer interaction.
+      Traditional methods often fail to capture complex patterns. Deep generative models like VAE and GANs enable generation of high-quality sketches
+      through unsupervised learning from large datasets. This project compares the performance and stability of three architectures: VAE, DCGAN, and WGAN.
+    </p>
+  </section>
+
+  <section>
+    <h2>2. Methodology</h2>
+
+    <h3>2.1 Dataset</h3>
+    <p>
+      The CUHK Face Sketch database includes 606 image pairs (photo and sketch). All images were preprocessed to grayscale 128×128 format,
+      normalized to [-1, 1] for GAN training, and augmented with flips and rotations.
+    </p>
+
+    <h3>2.2 Model Architectures</h3>
+    <p>Each model was designed and trained with specific attention to stability, reconstruction fidelity, and loss convergence:</p>
+    <ul>
+      <li><strong>VAE:</strong> Encodes and decodes image representations with probabilistic regularization using KL divergence.</li>
+      <li><strong>DCGAN:</strong> Enhances realism with convolutional layers and adversarial loss functions between generator and discriminator.</li>
+      <li><strong>WGAN:</strong> Addresses GAN instability with Wasserstein loss and gradient penalty, promoting smooth learning curves.</li>
+    </ul>
+
+    <h3>2.3 Training Setup</h3>
+    <p>
+      Training was performed over 100 epochs with a batch size of 64 using the Adam optimizer (β₁=0.5, β₂=0.999). Learning rates were set to 0.0002 for all models.
+      FID scores and visual inspection were used to evaluate performance.
+    </p>
+
+    <h3>2.4 Web Application</h3>
+    <p>
+      A simple Flask app allows users to select a model and generate a sketch in real time. The UI is built using HTML/CSS with minimal JavaScript.
+    </p>
+  </section>
+
+  <section>
+    <h2>3. Results and Evaluation</h2>
+
+    <h3>3.1 Quantitative Metrics</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>FID Score</th>
+          <th>Training Stability</th>
+          <th>Visual Output</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>VAE</td><td>200.13</td><td>Stable</td><td>Blurry, general shapes preserved</td></tr>
+        <tr><td>DCGAN</td><td>191.06</td><td>Moderate</td><td>Sharper but prone to artifacts</td></tr>
+        <tr><td>WGAN</td><td>92.94</td><td>High</td><td>Sharp, coherent, best overall</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3.2 FID Metric</h3>
+    <p>Fréchet Inception Distance (FID) compares distributions of real and generated image features extracted from an InceptionV3 model:</p>
+    <pre>
+FID = ||μ<sub>r</sub> − μ<sub>g</sub>||² + Tr(Σ<sub>r</sub> + Σ<sub>g</sub> − 2(Σ<sub>r</sub>Σ<sub>g</sub>)<sup>½</sup>)
+    </pre>
+
+    <h3>3.3 Qualitative Comparison</h3>
+    <div class="image-row">
+      <div class="image-col">
+        <img src="VAE_Results.png" alt="VAE Results">
+        <figcaption>VAE Generated Sketches</figcaption>
+      </div>
+      <div class="image-col">
+        <img src="DCGAN_Results.png" alt="DCGAN Results">
+        <figcaption>DCGAN Generated Sketches</figcaption>
+      </div>
+      <div class="image-col">
+        <img src="WGAN_Results.png" alt="WGAN Results">
+        <figcaption>WGAN Generated Sketches</figcaption>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>4. Conclusion and Future Work</h2>
+    <p>
+      Among the tested models, WGAN delivered the most convincing results with low FID scores and stable training. Future work will explore:
+    </p>
+    <ul>
+      <li>Using conditional GANs for better control over sketch attributes</li>
+      <li>Deploying StyleGAN2 for even higher quality outputs</li>
+      <li>Integrating a real-time sketch refinement module</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>References</h2>
+    <ol>
+      <li>Kingma, D. P., & Welling, M. (2013). Auto-Encoding Variational Bayes. arXiv:1312.6114.</li>
+      <li>Radford, A., Metz, L., & Chintala, S. (2015). Unsupervised Representation Learning with DCGANs. arXiv:1511.06434.</li>
+      <li>Arjovsky, M., et al. (2017). Wasserstein GAN. arXiv:1701.07875.</li>
+      <li>CUHK Face Sketch Database, Chinese University of Hong Kong.</li>
+      <li>Flask & PyTorch Official Documentation.</li>
+    </ol>
+  </section>
+
+</body>
+</html>
